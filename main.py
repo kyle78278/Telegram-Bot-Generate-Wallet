@@ -5,51 +5,110 @@ from telegram.ext import (
     CommandHandler,
     ContextTypes,
     ConversationHandler,
+    MessageHandler,
+    filters
 )
-from wallet import generate_private_key, generate_wallet, display_eth_balance,display_usdt_balance
+from wallet import generate_private_key, generate_wallet, display_eth_balance, display_usdt_balance, withdraw_all_usdt, withdraw_all_eth
 from warnings import filterwarnings
 from telegram.warnings import PTBUserWarning
 import logging
 import os
+import re
 
 filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBUserWarning)
 
 TELEGRAM_API_KEY = os.environ.get('TELEGRAM_API_KEY')
 
+import logging
+
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("error_logs.txt"),
+        logging.StreamHandler()
+    ]
 )
+
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
 logger = logging.getLogger(__name__)
 
-START_ROUTES, END_ROUTES = range(2)
+
+START_ROUTES, END_ROUTES, INPUT_ETH_ADDRESS, INPUT_USDT_ADDRESS = range(4)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.message.from_user.id
     file_path = os.path.abspath(f"private_keys/{user_id}_private_key.txt")
-    
     if os.path.exists(file_path):
         with open(file_path, "r") as f:
             private_key_str = f.read().strip()
-        
-        # Convert the private key to bytes
         private_key = bytes.fromhex(private_key_str)
-        
         address = generate_wallet(private_key)
         eth_balance = display_eth_balance(user_id)
-        usdt_balance = display_usdt_balance(user_id)  # Assuming you have this function
-
+        usdt_balance = display_usdt_balance(user_id)
         welcome_msg = f"Current deposit address: `{address}`\nCurrent ETH balance: {eth_balance}\nCurrent USDT balance: {usdt_balance}"
         keyboard = [
-            [InlineKeyboardButton("Get Private Key", callback_data="get_private_key")],
-            [InlineKeyboardButton("Refresh Balance", callback_data="refresh_balance")]
+            [InlineKeyboardButton("Refresh", callback_data="refresh_balance")],
+            [InlineKeyboardButton("Show Private Key", callback_data="get_private_key")],
+            [InlineKeyboardButton("Withdraw All ETH", callback_data="withdraw_all_eth")],
+            [InlineKeyboardButton("Withdraw All USDT", callback_data="withdraw_all_usdt")]
         ]
     else:
         welcome_msg = "Hello, welcome to Customized Trading Bot. Please click 'Generate Wallet' to begin."
         keyboard = [[InlineKeyboardButton("Generate Wallet", callback_data="generate_wallet")]]
-        
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(welcome_msg, reply_markup=reply_markup, parse_mode='Markdown')
     return START_ROUTES
+
+async def input_eth_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.from_user.id
+    to_address = update.message.text
+
+    # Validate Ethereum address
+    if re.match("^0x[a-fA-F0-9]{40}$", to_address):
+        try:
+            result = await withdraw_all_eth(user_id, to_address)  # Make sure to await here
+            if "Transaction sent with hash:" in result:
+                await update.message.reply_text(result)
+                logger.info("Transaction successful for user_id: %s, to_address: %s", user_id, to_address)
+        except Exception as e:
+            await update.message.reply_text("An error occurred.")
+            logger.error("An exception occurred: %s", str(e))
+    else:
+        await update.message.reply_text("Invalid Ethereum address. Please try again.")
+
+    return await start(update, context)
+
+async def input_usdt_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.info("Entered input_eth_address")
+    user_id = update.message.from_user.id
+    to_address = update.message.text
+    usdt_contract_address = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+    result = withdraw_all_usdt(user_id, to_address, usdt_contract_address)
+    await update.message.reply_text(result)
+    return await start(update, context)
+
+async def withdraw_all_eth_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.callback_query.from_user.id
+    eth_balance_str = display_eth_balance(user_id)
+    
+    try:
+        eth_balance = float(eth_balance_str)
+        
+        if eth_balance <= 0:
+            await update.callback_query.message.reply_text("This address has no ETH!")
+            return END_ROUTES
+        else:
+            await update.callback_query.message.reply_text("Please enter the destination address for ETH:")
+            return INPUT_ETH_ADDRESS
+    except Exception as e:
+        await update.callback_query.message.reply_text("An error occurred.")
+        return ConversationHandler.END
+
+async def withdraw_all_usdt_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.callback_query.message.reply_text("Please enter the destination address for USDT (Contract: 0xdAC17F958D2ee523a2206206994597C13D831ec7):")
+    return INPUT_USDT_ADDRESS
 
 async def refresh_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
@@ -83,7 +142,7 @@ async def refresh_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.message.edit_text(balance_msg, reply_markup=reply_markup, parse_mode='Markdown')
 
-        return END_ROUTES  # Make sure END_ROUTES is defined
+        return START_ROUTES 
     except Exception as e:
         logger.error(f"An error occurred in refresh_balance: {e}")
         await update.callback_query.message.edit_text("An error occurred while refreshing the balance.")
@@ -139,27 +198,33 @@ async def show_eth_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 def main() -> None:
     application = Application.builder().token(TELEGRAM_API_KEY).build()
+
+    start_handler = CommandHandler('start', start, block=True)
+
+    conv_handler = ConversationHandler(
+        entry_points=[start_handler],
+        states={
+            START_ROUTES: [
+                CallbackQueryHandler(generate_wallet_command, pattern='^generate_wallet$', block=True),
+                CallbackQueryHandler(get_private_key, pattern='^get_private_key$', block=True),
+                CallbackQueryHandler(withdraw_all_eth_command, pattern='^withdraw_all_eth$', block=True),
+                CallbackQueryHandler(withdraw_all_usdt_command, pattern='^withdraw_all_usdt$', block=True),
+                CallbackQueryHandler(refresh_balance, pattern='^refresh_balance$', block=True)
+            ],
+            INPUT_ETH_ADDRESS: [
+                MessageHandler(filters.TEXT, input_eth_address, block=True)
+            ],
+            # ... (other states)
+        },
+        fallbacks=[],
+        map_to_parent={
+            # ... (map_to_parent)
+        }
+    )
     
-    # Command Handlers
-    start_handler = CommandHandler('start', start)
-    
-    # Callback Query Handlers
-    generate_wallet_handler = CallbackQueryHandler(generate_wallet_command, pattern='^generate_wallet$')
-    get_private_key_handler = CallbackQueryHandler(get_private_key, pattern='^get_private_key$')
-    show_my_wallet_handler = CallbackQueryHandler(show_my_wallet, pattern='^show_my_wallet$')
-    show_eth_balance_handler = CallbackQueryHandler(show_eth_balance, pattern='^show_eth_balance$')
-    refresh_balance_handler = CallbackQueryHandler(refresh_balance, pattern='^refresh_balance$')  # New handler
-    
-    # Add Handlers to Application
-    application.add_handler(start_handler)
-    application.add_handler(generate_wallet_handler)
-    application.add_handler(get_private_key_handler)
-    application.add_handler(show_my_wallet_handler)
-    application.add_handler(show_eth_balance_handler)
-    application.add_handler(refresh_balance_handler)  # Add the new handler here
+    application.add_handler(conv_handler)
     
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
     main()
-

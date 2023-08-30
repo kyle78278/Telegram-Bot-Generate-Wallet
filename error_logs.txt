@@ -1,0 +1,56 @@
+2023-08-30 19:10:21,269 - telegram.ext.Application - INFO - Application started
+2023-08-30 19:10:42,825 - __main__ - INFO - Entered withdraw_all_eth_command
+2023-08-30 19:21:11,396 - telegram.ext.Application - INFO - Application started
+2023-08-30 19:21:17,344 - __main__ - INFO - Entered withdraw_all_eth_command
+2023-08-30 19:21:17,345 - __main__ - INFO - User ID extracted: 6117012777
+2023-08-30 19:21:17,346 - __main__ - INFO - About to check ETH balance
+2023-08-30 19:21:17,428 - __main__ - INFO - ETH balance checked: 0.05
+2023-08-30 19:21:17,428 - __main__ - INFO - ETH balance converted to float: 0.05
+2023-08-30 19:21:17,429 - __main__ - INFO - ETH balance is positive, asking for destination address
+2023-08-30 19:23:33,230 - telegram.ext.Application - INFO - Application started
+2023-08-30 19:23:43,238 - __main__ - INFO - Entered withdraw_all_eth_command
+2023-08-30 19:23:43,239 - __main__ - INFO - User ID extracted: 6117012777
+2023-08-30 19:23:43,239 - __main__ - INFO - About to check ETH balance
+2023-08-30 19:23:43,386 - __main__ - INFO - ETH balance checked: 0.05
+2023-08-30 19:23:43,386 - __main__ - INFO - ETH balance converted to float: 0.05
+2023-08-30 19:23:43,387 - __main__ - INFO - ETH balance is positive, asking for destination address
+2023-08-30 19:28:16,626 - telegram.ext.Application - INFO - Application started
+2023-08-30 19:33:10,783 - telegram.ext.Application - INFO - Application started
+2023-08-30 19:33:16,742 - __main__ - INFO - Entered withdraw_all_eth_command
+2023-08-30 19:33:16,742 - __main__ - INFO - User ID extracted: 6117012777
+2023-08-30 19:33:16,742 - __main__ - INFO - About to check ETH balance
+2023-08-30 19:33:16,830 - __main__ - INFO - ETH balance checked: 0.05
+2023-08-30 19:33:16,830 - __main__ - INFO - ETH balance converted to float: 0.05
+2023-08-30 19:33:16,830 - __main__ - INFO - ETH balance is positive, asking for destination address
+2023-08-30 19:41:18,642 - telegram.ext.Application - INFO - Application started
+2023-08-30 19:41:39,800 - __main__ - INFO - Entered withdraw_all_eth_command
+2023-08-30 19:41:39,802 - __main__ - INFO - User ID extracted: 6117012777
+2023-08-30 19:41:39,802 - __main__ - INFO - About to check ETH balance
+2023-08-30 19:41:39,920 - __main__ - INFO - ETH balance checked: 0.05
+2023-08-30 19:41:39,921 - __main__ - INFO - ETH balance converted to float: 0.05
+2023-08-30 19:41:39,921 - __main__ - INFO - ETH balance is positive, asking for destination address
+2023-08-30 19:44:22,124 - telegram.ext.Application - INFO - Application started
+2023-08-30 19:44:37,344 - __main__ - INFO - Entered withdraw_all_eth_command
+2023-08-30 19:44:37,346 - __main__ - INFO - User ID extracted: 6117012777
+2023-08-30 19:44:37,433 - __main__ - INFO - About to check ETH balance
+2023-08-30 19:44:37,433 - __main__ - INFO - ETH balance checked: 0.05
+2023-08-30 19:44:37,434 - __main__ - INFO - ETH balance converted to float: 0.05
+2023-08-30 19:44:37,681 - __main__ - INFO - ETH balance is positive, asking for destination address
+2023-08-30 20:09:52,035 - telegram.ext.Application - INFO - Application started
+2023-08-30 20:19:21,883 - telegram.ext.Application - INFO - Application started
+2023-08-30 20:19:52,533 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 68, in input_eth_address
+    if re.match("^0x[a-fA-F0-9]{40}$", to_address):
+NameError: name 're' is not defined
+2023-08-30 20:20:47,921 - telegram.ext.Application - INFO - Application started
+2023-08-30 20:20:58,293 - __main__ - INFO - Transaction successful for user_id: 6117012777, to_address: 0xD5042ba7e365CeA492Ee9a2715c5cf47a012663a
+2023-08-30 20:26:43,881 - telegram.ext.Application - INFO - Application started
+2023-08-30 20:27:25,746 - __main__ - INFO - Transaction successful for user_id: 6117012777, to_address: 0xD5042ba7e365CeA492Ee9a2715c5cf47a012663a
+2023-08-30 20:29:41,537 - telegram.ext.Application - INFO - Application started
