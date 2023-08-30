@@ -54,3 +54,79 @@ NameError: name 're' is not defined
 2023-08-30 20:26:43,881 - telegram.ext.Application - INFO - Application started
 2023-08-30 20:27:25,746 - __main__ - INFO - Transaction successful for user_id: 6117012777, to_address: 0xD5042ba7e365CeA492Ee9a2715c5cf47a012663a
 2023-08-30 20:29:41,537 - telegram.ext.Application - INFO - Application started
+2023-08-30 20:38:52,056 - telegram.ext.Updater - ERROR - Error while getting Updates: httpx.RemoteProtocolError: Server disconnected without sending a response.
+2023-08-30 20:38:52,056 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpx/_transports/default.py", line 60, in map_httpcore_exceptions
+    yield
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpx/_transports/default.py", line 353, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpcore/_async/connection_pool.py", line 262, in handle_async_request
+    raise exc
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpcore/_async/connection_pool.py", line 245, in handle_async_request
+    response = await connection.handle_async_request(request)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpcore/_async/connection.py", line 96, in handle_async_request
+    return await self._connection.handle_async_request(request)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpcore/_async/http11.py", line 121, in handle_async_request
+    raise exc
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpcore/_async/http11.py", line 99, in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpcore/_async/http11.py", line 164, in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpcore/_async/http11.py", line 214, in _receive_event
+    raise RemoteProtocolError(msg)
+httpcore.RemoteProtocolError: Server disconnected without sending a response.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/request/_httpxrequest.py", line 216, in do_request
+    res = await self._client.request(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpx/_client.py", line 1530, in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpx/_client.py", line 1617, in send
+    response = await self._send_handling_auth(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpx/_client.py", line 1645, in _send_handling_auth
+    response = await self._send_handling_redirects(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpx/_client.py", line 1682, in _send_handling_redirects
+    response = await self._send_single_request(request)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpx/_client.py", line 1719, in _send_single_request
+    response = await transport.handle_async_request(request)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpx/_transports/default.py", line 352, in handle_async_request
+    with map_httpcore_exceptions():
+  File "/nix/store/xf54733x4chbawkh1qvy9i1i4mlscy1c-python3-3.10.11/lib/python3.10/contextlib.py", line 153, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/httpx/_transports/default.py", line 77, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.RemoteProtocolError: Server disconnected without sending a response.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_updater.py", line 604, in _network_loop_retry
+    if not await action_cb():
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_updater.py", line 331, in polling_action_cb
+    raise exc
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_updater.py", line 320, in polling_action_cb
+    updates = await self.bot.get_updates(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_extbot.py", line 550, in get_updates
+    updates = await super().get_updates(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/_bot.py", line 388, in decorator
+    result = await func(self, *args, **kwargs)  # skipcq: PYL-E1102
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/_bot.py", line 3668, in get_updates
+    await self._post(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/_bot.py", line 476, in _post
+    return await self._do_post(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_extbot.py", line 332, in _do_post
+    return await super()._do_post(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/_bot.py", line 504, in _do_post
+    return await request.post(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/request/_baserequest.py", line 168, in post
+    result = await self._request_wrapper(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/request/_baserequest.py", line 288, in _request_wrapper
+    raise exc
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/request/_baserequest.py", line 278, in _request_wrapper
+    code, payload = await self.do_request(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/request/_httpxrequest.py", line 240, in do_request
+    raise NetworkError(f"httpx.{err.__class__.__name__}: {err}") from err
+telegram.error.NetworkError: httpx.RemoteProtocolError: Server disconnected without sending a response.
