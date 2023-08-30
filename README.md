@@ -7,7 +7,13 @@ Also you will need the following:
 - RPC API provider like infura or alchemy 
 
 todo: 
-- USDT withdrawls 
+- USDT withdrawls
+- clean up bot logic and flow
+- multi wallet support
+- better interface for wallets and balance
+- error handling for things like if a user tries to request too many wallets
+- wallet limit
+- better safe keeping practices for private key storage
 - dydx connections
 - dydx trade executions
 - open positions csv
