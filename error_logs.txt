@@ -130,3 +130,51 @@ Traceback (most recent call last):
   File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/request/_httpxrequest.py", line 240, in do_request
     raise NetworkError(f"httpx.{err.__class__.__name__}: {err}") from err
 telegram.error.NetworkError: httpx.RemoteProtocolError: Server disconnected without sending a response.
+2023-08-31 04:37:00,807 - telegram.ext.Application - INFO - Application started
+2023-08-31 04:53:53,670 - telegram.ext.Application - INFO - Application started
+2023-08-31 04:54:30,402 - telegram.ext.Application - INFO - Application started
+2023-08-31 05:01:29,213 - telegram.ext.Application - INFO - Application started
+2023-08-31 05:01:54,028 - telegram.ext.Application - INFO - Application started
+2023-08-31 05:04:11,308 - telegram.ext.Application - INFO - Application started
+2023-08-31 05:20:29,755 - telegram.ext.Application - INFO - Application started
+2023-08-31 05:25:18,315 - telegram.ext.Application - INFO - Application started
+2023-08-31 05:41:05,937 - telegram.ext.Application - INFO - Application started
+2023-08-31 05:43:51,304 - telegram.ext.Application - INFO - Application started
+2023-08-31 05:48:52,606 - telegram.ext.Application - INFO - Application started
+2023-08-31 05:50:11,207 - telegram.ext.Application - INFO - Application started
+2023-08-31 05:57:37,215 - telegram.ext.Application - INFO - Application started
+2023-08-31 06:00:37,903 - telegram.ext.Application - INFO - Application started
+2023-08-31 06:31:11,532 - telegram.ext.Application - INFO - Application started
+2023-08-31 06:34:55,031 - telegram.ext.Application - INFO - Application started
+2023-08-31 06:36:33,769 - telegram.ext.Application - INFO - Application started
+2023-08-31 06:38:40,008 - telegram.ext.Application - INFO - Application started
+2023-08-31 06:43:32,872 - telegram.ext.Application - INFO - Application started
+2023-08-31 06:45:26,204 - telegram.ext.Application - INFO - Application started
+2023-08-31 06:52:13,450 - telegram.ext.Application - INFO - Application started
+2023-08-31 07:03:06,857 - telegram.ext.Application - INFO - Application started
+2023-08-31 07:07:26,922 - telegram.ext.Application - INFO - Application started
+2023-08-31 07:08:36,713 - telegram.ext.Application - INFO - Application started
+2023-08-31 07:08:56,816 - telegram.ext.Application - INFO - Application started
+2023-08-31 07:09:17,032 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 224, in get_private_key
+    return PRIVATE_KEY_ROUTES
+NameError: name 'PRIVATE_KEY_ROUTES' is not defined
+2023-08-31 07:09:23,068 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 224, in get_private_key
+    return PRIVATE_KEY_ROUTES
+NameError: name 'PRIVATE_KEY_ROUTES' is not defined
+2023-08-31 07:10:40,911 - telegram.ext.Application - INFO - Application started

@@ -1,19 +1,14 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import (
-    Application,
-    CallbackQueryHandler,
-    CommandHandler,
-    ContextTypes,
-    ConversationHandler,
-    MessageHandler,
-    filters
-)
-from wallet import generate_private_key, generate_wallet, display_eth_balance, display_usdt_balance, withdraw_all_usdt, withdraw_all_eth
-from warnings import filterwarnings
-from telegram.warnings import PTBUserWarning
 import logging
 import os
 import re
+
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler, MessageHandler, filters
+from wallet import generate_private_key, generate_wallet, display_eth_balance, display_usdt_balance, withdraw_all_usdt, withdraw_all_eth
+from warnings import filterwarnings
+from telegram.warnings import PTBUserWarning
+from enum import Enum, auto
+
 
 filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBUserWarning)
 
@@ -35,31 +30,67 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
-START_ROUTES, END_ROUTES, INPUT_ETH_ADDRESS, INPUT_USDT_ADDRESS = range(4)
-
+(START_ROUTES,
+GENERATE_WALLET,
+MAIN_MENU,
+TRADE_MENU,
+WALLET_MENU,
+INPUT_ETH_ADDRESS,
+INPUT_USDT_ADDRESS,
+DELETE_WALLET,
+END_ROUTES) = range(9)
+  
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.message.from_user.id
     file_path = os.path.abspath(f"private_keys/{user_id}_private_key.txt")
+    
     if os.path.exists(file_path):
-        with open(file_path, "r") as f:
-            private_key_str = f.read().strip()
-        private_key = bytes.fromhex(private_key_str)
-        address = generate_wallet(private_key)
-        eth_balance = display_eth_balance(user_id)
-        usdt_balance = display_usdt_balance(user_id)
-        welcome_msg = f"Current deposit address: `{address}`\nCurrent ETH balance: {eth_balance}\nCurrent USDT balance: {usdt_balance}"
-        keyboard = [
-            [InlineKeyboardButton("Refresh", callback_data="refresh_balance")],
-            [InlineKeyboardButton("Show Private Key", callback_data="get_private_key")],
-            [InlineKeyboardButton("Withdraw All ETH", callback_data="withdraw_all_eth")],
-            [InlineKeyboardButton("Withdraw All USDT", callback_data="withdraw_all_usdt")]
-        ]
+        # If the user already has a wallet
+        return await show_main_menu(update, context)
     else:
+        # If the user doesn't have a wallet
         welcome_msg = "Hello, welcome to Customized Trading Bot. Please click 'Generate Wallet' to begin."
         keyboard = [[InlineKeyboardButton("Generate Wallet", callback_data="generate_wallet")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(welcome_msg, reply_markup=reply_markup)
+        return START_ROUTES
+
+async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_id = update.message.from_user.id if update.message else update.callback_query.from_user.id
+    file_path = os.path.abspath(f"private_keys/{user_id}_private_key.txt")
+
+    with open(file_path, "r") as f:
+        private_key_str = f.read().strip()
+    
+    private_key = bytes.fromhex(private_key_str)
+    address = generate_wallet(private_key)
+    eth_balance = display_eth_balance(user_id)
+    usdt_balance = display_usdt_balance(user_id)
+    menu_msg = f"Current deposit address: `{address}`\nCurrent ETH balance: {eth_balance}\nCurrent USDT balance: {usdt_balance}"
+
+    keyboard = [
+        [InlineKeyboardButton("Trade", callback_data="show_trade_menu")],
+        [InlineKeyboardButton("Wallet", callback_data="show_wallet_menu")]
+    ]
+    
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(welcome_msg, reply_markup=reply_markup, parse_mode='Markdown')
-    return START_ROUTES
+    if update.message:
+        await update.message.reply_text(menu_msg, reply_markup=reply_markup, parse_mode='Markdown')
+    else:
+        await update.callback_query.message.edit_text(menu_msg, reply_markup=reply_markup, parse_mode='Markdown')
+    return MAIN_MENU
+
+async def show_wallet_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("Refresh", callback_data="refresh_balance")],
+        [InlineKeyboardButton("Show Private Key", callback_data="get_private_key")],
+        [InlineKeyboardButton("Withdraw All ETH", callback_data="withdraw_all_eth")],
+        [InlineKeyboardButton("Withdraw All USDT", callback_data="withdraw_all_usdt")],
+        [InlineKeyboardButton("Back", callback_data="back_to_main")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.edit_reply_markup(reply_markup=reply_markup)
+    return WALLET_MENU
 
 async def input_eth_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
@@ -79,6 +110,30 @@ async def input_eth_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Invalid Ethereum address. Please try again.")
 
     return await start(update, context)
+
+async def generate_wallet_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.callback_query.from_user.id
+    private_key = generate_private_key()
+    wallet_address = generate_wallet(private_key)
+    with open(f"private_keys/{user_id}_private_key.txt", "w") as f:
+        f.write(private_key.hex())
+    
+    # Get the updated balances
+    eth_balance = display_eth_balance(user_id)
+    usdt_balance = display_usdt_balance(user_id)
+
+    # Message to display deposit address and balances
+    balance_msg = f"ERC20 deposit address: `{wallet_address}`\nCurrent ETH balance: {eth_balance}\nCurrent USDT balance: {usdt_balance}"
+
+    # Update the keyboard buttons to be the same as when the user already has a wallet
+    keyboard = [
+        [InlineKeyboardButton("Trade", callback_data="show_trade_menu")],
+        [InlineKeyboardButton("Wallet", callback_data="show_wallet_menu")]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.reply_text(balance_msg, reply_markup=reply_markup, parse_mode='Markdown')
+    return GENERATE_WALLET
 
 async def input_usdt_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info("Entered input_eth_address")
@@ -142,47 +197,47 @@ async def refresh_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.message.edit_text(balance_msg, reply_markup=reply_markup, parse_mode='Markdown')
 
-        return START_ROUTES 
+        return WALLET_MENU 
     except Exception as e:
         logger.error(f"An error occurred in refresh_balance: {e}")
         await update.callback_query.message.edit_text("An error occurred while refreshing the balance.")
         return ConversationHandler.END  # Make sure ConversationHandler is imported or defined
 
-async def generate_wallet_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.callback_query.from_user.id
-    private_key = generate_private_key()
-    wallet_address = generate_wallet(private_key)
-    with open(f"private_keys/{user_id}_private_key.txt", "w") as f:
-        f.write(private_key.hex())
-    keyboard = [
-        [InlineKeyboardButton("Get Private Key", callback_data="get_private_key"),
-         InlineKeyboardButton("Show ETH Balance", callback_data="show_eth_balance")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.callback_query.message.reply_text(f"ERC20 deposit address: {wallet_address}", reply_markup=reply_markup)
-    return END_ROUTES
 
 async def get_private_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.callback_query.from_user.id
-    with open(f"private_keys/{user_id}_private_key.txt", "r") as f:
-        private_key = f.read()
-    await update.callback_query.message.reply_text(f"Your stored Private Key: {private_key}")
-    return END_ROUTES
 
-async def show_my_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.callback_query.from_user.id
     with open(f"private_keys/{user_id}_private_key.txt", "r") as f:
         private_key = f.read()
-    private_key_bytes = bytes.fromhex(private_key)  # Convert to byte string
-    wallet_address = generate_wallet(private_key_bytes)  # Pass byte string
+
+    warning_msg = ("Here is your private key. DO NOT SHARE IT WITH ANYONE OR YOU WILL LOSE YOUR FUNDS.\n\n"
+                   f"Private key: `{private_key}`")
+
     keyboard = [
-        [InlineKeyboardButton("Get Private Key", callback_data="get_private_key"),
-         InlineKeyboardButton("Show ETH Balance", callback_data="show_eth_balance")]
+        [InlineKeyboardButton("Delete Wallet", callback_data="delete_wallet")],
+        [InlineKeyboardButton("Back to Wallet Menu", callback_data="back_to_wallet_menu")]
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.callback_query.message.reply_text(f"ERC20 deposit address: {wallet_address}", reply_markup=reply_markup)
-    return END_ROUTES
 
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.callback_query.message.reply_text(warning_msg, reply_markup=reply_markup, parse_mode='Markdown')
+    return MAIN_MENU
+
+async def delete_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.callback_query.from_user.id
+    try:
+        os.remove(f"private_keys/{user_id}_private_key.txt")
+    except FileNotFoundError:
+        logging.error(f"Failed to delete private key for user {user_id}: File not found")
+        await update.callback_query.message.reply_text("Error: Private key file not found.")
+        return START_ROUTES
+    except Exception as e:
+        logging.error(f"Failed to delete private key for user {user_id}: {e}")
+        await update.callback_query.message.reply_text("Error: Could not delete private key.")
+        return START_ROUTES
+    else:
+        await start(update, context)
+        return DELETE_WALLET
 
 async def show_eth_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
@@ -195,35 +250,67 @@ async def show_eth_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await update.callback_query.message.reply_text(f"An error occurred while retrieving the ETH balance: {e}")
         return ConversationHandler.END
 
+async def show_trade_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [[InlineKeyboardButton("Back", callback_data="back_to_main")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.edit_reply_markup(reply_markup=reply_markup)
+    return TRADE_MENU
 
 def main() -> None:
     application = Application.builder().token(TELEGRAM_API_KEY).build()
 
+    # Initialize the /start command handler
     start_handler = CommandHandler('start', start, block=True)
 
+    # Initialize the conversation handler
     conv_handler = ConversationHandler(
         entry_points=[start_handler],
         states={
             START_ROUTES: [
-                CallbackQueryHandler(generate_wallet_command, pattern='^generate_wallet$', block=True),
+                CallbackQueryHandler(generate_wallet_command, pattern='^generate_wallet$', block=True)
+            ],
+            GENERATE_WALLET: [
+                CallbackQueryHandler(show_main_menu, pattern='^back_to_main$', block=True),
+                CallbackQueryHandler(show_wallet_menu, pattern='^show_wallet_menu$', block=True),
+                CallbackQueryHandler(show_trade_menu, pattern='^show_trade_menu$', block=True)
+            ],
+            MAIN_MENU: [
+                CallbackQueryHandler(show_wallet_menu, pattern='^show_wallet_menu$', block=True),
+                CallbackQueryHandler(show_trade_menu, pattern='^show_trade_menu$', block=True)
+            ],
+            TRADE_MENU: [
+                CallbackQueryHandler(show_main_menu, pattern='^back_to_main$', block=True)
+            ],
+            WALLET_MENU: [
                 CallbackQueryHandler(get_private_key, pattern='^get_private_key$', block=True),
+                CallbackQueryHandler(refresh_balance, pattern='^refresh_balance$', block=True),
                 CallbackQueryHandler(withdraw_all_eth_command, pattern='^withdraw_all_eth$', block=True),
                 CallbackQueryHandler(withdraw_all_usdt_command, pattern='^withdraw_all_usdt$', block=True),
-                CallbackQueryHandler(refresh_balance, pattern='^refresh_balance$', block=True)
+                CallbackQueryHandler(show_main_menu, pattern='^back_to_main$', block=True),
+                CallbackQueryHandler(show_wallet_menu, pattern='^back_to_wallet_menu$', block=True)
             ],
             INPUT_ETH_ADDRESS: [
                 MessageHandler(filters.TEXT, input_eth_address, block=True)
             ],
-            # ... (other states)
+            INPUT_USDT_ADDRESS: [
+                MessageHandler(filters.TEXT, input_usdt_address, block=True)
+            ],
+            DELETE_WALLET: [
+                CallbackQueryHandler(delete_wallet, pattern='^delete_wallet$', block=True),
+            ]
         },
         fallbacks=[],
         map_to_parent={
-            # ... (map_to_parent)
+            DELETE_WALLET: START_ROUTES,
+            INPUT_ETH_ADDRESS: MAIN_MENU,
+            INPUT_USDT_ADDRESS: MAIN_MENU
         }
     )
-    
+
+    # Add the conversation handler to the application
     application.add_handler(conv_handler)
-    
+
+    # Run the application
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
