@@ -113,7 +113,7 @@ async def withdraw_all_eth(user_id: int, to_address: str) -> str:
         balance = w3.eth.get_balance(from_address)
 
         # Estimate gas (assuming a fixed gas amount, you can adjust this)
-        gas_estimate = 21000  # This is the typical gas limit for a simple ETH transfer
+        gas_estimate = 210000  # This is the typical gas limit for a simple ETH transfer
 
         # Calculate the value to send (balance - gas)
         value_to_send = balance - (gas_estimate * gas_price_wei)

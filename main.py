@@ -32,7 +32,8 @@ logger = logging.getLogger(__name__)
 GENERATE_WALLET,
 MAIN_MENU,
 TRADE_MENU,
-WALLET_MENU,) = range(5)
+WALLET_MENU,
+WITHDRAWL) = range(6)
   
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.message.from_user.id
@@ -53,6 +54,10 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user_id = update.message.from_user.id if update.message else update.callback_query.from_user.id
     file_path = os.path.abspath(f"private_keys/{user_id}_private_key.txt")
 
+    if not os.path.exists(file_path):
+        # If the user doesn't have a wallet, return to a different state or show a different message.
+        return await start(update, context)  # or whatever function you want to call
+
     with open(file_path, "r") as f:
         private_key_str = f.read().strip()
     
@@ -72,18 +77,49 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await update.message.reply_text(menu_msg, reply_markup=reply_markup, parse_mode='Markdown')
     else:
         await update.callback_query.message.edit_text(menu_msg, reply_markup=reply_markup, parse_mode='Markdown')
+    
+    context.user_data['state'] = MAIN_MENU  # Explicitly setting the state to MAIN_MENU
     return MAIN_MENU
 
-async def show_wallet_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def show_wallet_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_id = update.callback_query.from_user.id if update.callback_query else update.message.from_user.id
+
+    # Fetch the updated balances
+    eth_balance = float(display_eth_balance(user_id))
+    usdt_balance = float(display_usdt_balance(user_id))
+
+    # Fetch the deposit address
+    file_path = os.path.abspath(f"private_keys/{user_id}_private_key.txt")
+    
+    with open(file_path, "r") as f:
+        private_key_str = f.read().strip()
+    
+    private_key = bytes.fromhex(private_key_str)
+    address = generate_wallet(private_key)
+
+    balance_msg = f"Current deposit address: `{address}`\nCurrent ETH balance: {eth_balance}\nCurrent USDT balance: {usdt_balance}"
+    
+    # Conditionally build the keyboard
     keyboard = [
         [InlineKeyboardButton("Refresh", callback_data="refresh_balance")],
         [InlineKeyboardButton("Show Private Key", callback_data="get_private_key")],
-        [InlineKeyboardButton("Withdraw All ETH", callback_data="withdraw_all_eth")],
-        [InlineKeyboardButton("Withdraw All USDT", callback_data="withdraw_all_usdt")],
         [InlineKeyboardButton("Back", callback_data="back_to_main")]
     ]
+    
+    if eth_balance > 0:
+        keyboard.insert(2, [InlineKeyboardButton("Withdraw All ETH", callback_data="withdraw_all_eth")])
+        
+    if usdt_balance > 0:
+        keyboard.insert(3, [InlineKeyboardButton("Withdraw All USDT", callback_data="withdraw_all_usdt")])
+
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.callback_query.message.edit_reply_markup(reply_markup=reply_markup)
+
+    if update.callback_query:
+        await update.callback_query.message.edit_text(balance_msg, reply_markup=reply_markup, parse_mode='Markdown')
+    else:
+        await update.message.reply_text(balance_msg, reply_markup=reply_markup, parse_mode='Markdown')
+    
     return WALLET_MENU
 
 async def input_eth_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -147,17 +183,17 @@ async def withdraw_all_eth_command(update: Update, context: ContextTypes.DEFAULT
         
         if eth_balance <= 0:
             await update.callback_query.message.reply_text("This address has no ETH!")
-            return END_ROUTES
+            return WALLET_MENU
         else:
             await update.callback_query.message.reply_text("Please enter the destination address for ETH:")
-            return WALLET_MENU
+            return WITHDRAWL
     except Exception as e:
         await update.callback_query.message.reply_text("An error occurred.")
         return ConversationHandler.END
 
 async def withdraw_all_usdt_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.message.reply_text("Please enter the destination address for USDT (Contract: 0xdAC17F958D2ee523a2206206994597C13D831ec7):")
-    return WALLET_MENU
+    return WITHDRAWL
 
 async def refresh_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
@@ -185,9 +221,12 @@ async def refresh_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         # Step 3: Balance, deposit address, and buttons reappear with refreshed values
         balance_msg = f"Current deposit address: `{address}`\nCurrent ETH balance: {eth_balance}\nCurrent USDT balance: {usdt_balance}"
         keyboard = [
-            [InlineKeyboardButton("Get Private Key", callback_data="get_private_key")],
-            [InlineKeyboardButton("Refresh Balance", callback_data="refresh_balance")]
-        ]
+        [InlineKeyboardButton("Refresh", callback_data="refresh_balance")],
+        [InlineKeyboardButton("Show Private Key", callback_data="get_private_key")],
+        [InlineKeyboardButton("Withdraw All ETH", callback_data="withdraw_all_eth")],
+        [InlineKeyboardButton("Withdraw All USDT", callback_data="withdraw_all_usdt")],
+        [InlineKeyboardButton("Back", callback_data="back_to_main")]
+    ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.message.edit_text(balance_msg, reply_markup=reply_markup, parse_mode='Markdown')
 
@@ -214,8 +253,9 @@ async def get_private_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    await update.callback_query.message.reply_text(warning_msg, reply_markup=reply_markup, parse_mode='Markdown')
+    await update.callback_query.message.edit_text(warning_msg, reply_markup=reply_markup, parse_mode='Markdown')
     return WALLET_MENU
+
 
 async def delete_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logging.info("Entered delete_wallet function")  # To confirm function entry
@@ -261,24 +301,11 @@ async def after_delete_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE
     await update.callback_query.message.edit_reply_markup(reply_markup=reply_markup)
     return START_ROUTES
 
-async def show_eth_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    try:
-        user_id = update.callback_query.from_user.id  # Extract user_id here
-        balance = display_eth_balance(user_id)  # Pass user_id as an argument
-        await update.callback_query.message.reply_text(f"Your ETH Balance: {balance}")
-        return END_ROUTES
-    except Exception as e:
-        logger.error(f"An error occurred in show_eth_balance: {e}")
-        await update.callback_query.message.reply_text(f"An error occurred while retrieving the ETH balance: {e}")
-        return ConversationHandler.END
-
 async def show_trade_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("Back", callback_data="back_to_main")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.message.edit_reply_markup(reply_markup=reply_markup)
     return TRADE_MENU
-
-AFTER_DELETE_WALLET = "AFTER_DELETE_WALLET"  # New state constant
 
 def main() -> None:
     application = Application.builder().token(TELEGRAM_API_KEY).build()
@@ -291,33 +318,39 @@ def main() -> None:
         entry_points=[start_handler],
         states={
             START_ROUTES: [
-                CallbackQueryHandler(generate_wallet_command, pattern='^generate_wallet$', block=True)
-            ],
+    CallbackQueryHandler(generate_wallet_command, pattern='^generate_wallet$', block=True)
+],
             GENERATE_WALLET: [
-                CallbackQueryHandler(show_main_menu, pattern='^back_to_main$', block=True),
-                CallbackQueryHandler(show_wallet_menu, pattern='^show_wallet_menu$', block=True),
-                CallbackQueryHandler(show_trade_menu, pattern='^show_trade_menu$', block=True)
-            ],
+    CallbackQueryHandler(show_main_menu, pattern='^back_to_main$', block=True),
+    CallbackQueryHandler(show_wallet_menu, pattern='^show_wallet_menu$', block=True),
+    CallbackQueryHandler(show_trade_menu, pattern='^show_trade_menu$', block=True)
+],
             MAIN_MENU: [
-                CallbackQueryHandler(show_wallet_menu, pattern='^show_wallet_menu$', block=True),
-                CallbackQueryHandler(show_trade_menu, pattern='^show_trade_menu$', block=True),
-                CallbackQueryHandler(delete_wallet, pattern='^delete_wallet$', block=True),
-            ],
+    CallbackQueryHandler(show_wallet_menu, pattern='^show_wallet_menu$', block=True),
+    CallbackQueryHandler(show_trade_menu, pattern='^show_trade_menu$', block=True),
+    CallbackQueryHandler(delete_wallet, pattern='^delete_wallet$', block=True),
+],
             TRADE_MENU: [
-                CallbackQueryHandler(show_main_menu, pattern='^back_to_main$', block=True)
-            ],
+    CallbackQueryHandler(show_main_menu, pattern='^back_to_main$', block=True)
+],
             WALLET_MENU: [
-                CallbackQueryHandler(get_private_key, pattern='^get_private_key$', block=True),
-                CallbackQueryHandler(refresh_balance, pattern='^refresh_balance$', block=True),
-                CallbackQueryHandler(withdraw_all_eth_command, pattern='^withdraw_all_eth$', block=True),
-                CallbackQueryHandler(withdraw_all_usdt_command, pattern='^withdraw_all_usdt$', block=True),
-                CallbackQueryHandler(show_wallet_menu, pattern='^back_to_wallet_menu$', block=True),
-                CallbackQueryHandler(delete_wallet, pattern='^delete_wallet$', block=True),
-                MessageHandler(filters.TEXT, input_eth_address, block=True)
-            ],
+    CallbackQueryHandler(get_private_key, pattern='^get_private_key$', block=True),
+    CallbackQueryHandler(refresh_balance, pattern='^refresh_balance$', block=True),
+    CallbackQueryHandler(show_wallet_menu, pattern='^back_to_wallet_menu$', block=True),
+    CallbackQueryHandler(show_main_menu, pattern='^back_to_main$', block=True),
+    CallbackQueryHandler(delete_wallet, pattern='^delete_wallet$', block=True),
+    CallbackQueryHandler(withdraw_all_eth_command, pattern='^withdraw_all_eth$', block=True),
+    CallbackQueryHandler(withdraw_all_usdt_command, pattern='^withdraw_all_usdt$', block=True),
+],
+            WITHDRAWL: [
+    MessageHandler(filters.TEXT, input_eth_address, block=True),
+    CallbackQueryHandler(withdraw_all_eth_command, pattern='^withdraw_all_eth$', block=True),
+    CallbackQueryHandler(withdraw_all_usdt_command, pattern='^withdraw_all_usdt$', block=True),
+]
         },
-        fallbacks=[],
+        fallbacks=[start_handler],
         map_to_parent={
+            WITHDRAWL: WALLET_MENU
         }
     )
 
@@ -329,4 +362,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

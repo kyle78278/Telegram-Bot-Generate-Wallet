@@ -211,3 +211,132 @@ NameError: name 'PRIVATE_KEY_ROUTES' is not defined
 2023-08-31 08:25:08,806 - root - INFO - Entered delete_wallet function
 2023-08-31 08:25:09,017 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
 2023-08-31 08:25:09,018 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 08:31:54,626 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:32:04,201 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 112, in generate_wallet_command
+    with open(f"private_keys/{user_id}_private_key.txt", "w") as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'private_keys/6117012777_private_key.txt'
+2023-08-31 08:32:09,653 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 112, in generate_wallet_command
+    with open(f"private_keys/{user_id}_private_key.txt", "w") as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'private_keys/6117012777_private_key.txt'
+2023-08-31 08:35:36,495 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:36:42,224 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:37:00,622 - root - INFO - Entered delete_wallet function
+2023-08-31 08:37:00,902 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 08:37:00,905 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 08:40:26,942 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:40:36,817 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 87, in show_wallet_menu
+    text=message_text,
+NameError: name 'message_text' is not defined
+2023-08-31 08:40:41,227 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 87, in show_wallet_menu
+    text=message_text,
+NameError: name 'message_text' is not defined
+2023-08-31 08:41:36,120 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:42:11,025 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:42:24,293 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 79, in show_wallet_menu
+    message_text = f"Current deposit address: `{address}`\nCurrent ETH balance: {eth_balance}\nCurrent USDT balance: {usdt_balance}"
+NameError: name 'address' is not defined
+2023-08-31 08:44:34,451 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:44:42,376 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 78, in show_wallet_menu
+    private_key = bytes.fromhex(private_key_str)
+NameError: name 'private_key_str' is not defined
+2023-08-31 08:47:42,603 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:48:01,306 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+TypeError: show_wallet_menu() missing 2 required positional arguments: 'private_key_str' and 'user_id'
+2023-08-31 09:10:20,217 - telegram.ext.Application - INFO - Application started
+2023-08-31 09:10:46,404 - telegram.ext.Application - INFO - Application started
+2023-08-31 09:10:56,609 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 90, in show_wallet_menu
+    await update.callback_query.message.edit_message_reply_markup(
+AttributeError: 'Message' object has no attribute 'edit_message_reply_markup'
+2023-08-31 09:14:03,213 - telegram.ext.Application - INFO - Application started
+2023-08-31 09:14:37,094 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+TypeError: show_wallet_menu() missing 2 required positional arguments: 'private_key_str' and 'user_id'
+2023-08-31 09:17:11,823 - telegram.ext.Application - INFO - Application started
+2023-08-31 09:18:21,028 - telegram.ext.Application - INFO - Application started
+2023-08-31 09:18:35,552 - root - INFO - Entered delete_wallet function
+2023-08-31 09:18:35,762 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 09:18:35,773 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 09:25:35,223 - telegram.ext.Application - INFO - Application started
+2023-08-31 09:27:48,703 - telegram.ext.Application - INFO - Application started
+2023-08-31 09:47:26,169 - root - INFO - Entered delete_wallet function
+2023-08-31 09:47:27,811 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 09:47:27,822 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 09:54:18,132 - telegram.ext.Application - INFO - Application started
+2023-08-31 09:57:02,701 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:01:47,531 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:05:40,832 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:12:05,607 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:16:14,013 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:20:17,283 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:23:05,286 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:31:22,002 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:33:54,571 - telegram.ext.Application - INFO - Application started
