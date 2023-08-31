@@ -7,7 +7,6 @@ from telegram.ext import Application, CallbackQueryHandler, CommandHandler, Cont
 from wallet import generate_private_key, generate_wallet, display_eth_balance, display_usdt_balance, withdraw_all_usdt, withdraw_all_eth
 from warnings import filterwarnings
 from telegram.warnings import PTBUserWarning
-from enum import Enum, auto
 
 
 filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBUserWarning)
@@ -33,14 +32,38 @@ GENERATE_WALLET,
 MAIN_MENU,
 TRADE_MENU,
 WALLET_MENU,
-WITHDRAWL) = range(6)
+WITHDRAWL,
+INPUT_ETH_ADDRESS) = range(7)
   
+async def read_or_generate_private_key(user_id):
+    file_path = os.path.abspath(f"private_keys/{user_id}_private_key.txt")
+
+    # Check if file exists
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            private_key_str = f.read().strip()
+
+        # Check if file is non-empty and contains a valid private key
+        if len(private_key_str) == 64:
+            return bytes.fromhex(private_key_str)
+        else:
+            # If the file is empty or invalid, remove it
+            os.remove(file_path)
+
+    # If reached here, either file didn't exist or was empty/invalid, generate a new private key
+    new_private_key = generate_private_key()
+    with open(file_path, "w") as f:
+        f.write(new_private_key.hex())
+    
+    return new_private_key
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.message.from_user.id
-    file_path = os.path.abspath(f"private_keys/{user_id}_private_key.txt")
     
-    if os.path.exists(file_path):
-        # If the user already has a wallet
+    # This function will now handle empty files too
+    private_key = await read_or_generate_private_key(user_id)
+
+    if private_key:
         return await show_main_menu(update, context)
     else:
         # If the user doesn't have a wallet
@@ -49,6 +72,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text(welcome_msg, reply_markup=reply_markup)
         return START_ROUTES
+
 
 async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.message.from_user.id if update.message else update.callback_query.from_user.id
@@ -183,10 +207,10 @@ async def withdraw_all_eth_command(update: Update, context: ContextTypes.DEFAULT
         
         if eth_balance <= 0:
             await update.callback_query.message.reply_text("This address has no ETH!")
-            return WALLET_MENU
+            return END_ROUTES
         else:
             await update.callback_query.message.reply_text("Please enter the destination address for ETH:")
-            return WITHDRAWL
+            return INPUT_ETH_ADDRESS
     except Exception as e:
         await update.callback_query.message.reply_text("An error occurred.")
         return ConversationHandler.END
@@ -342,15 +366,12 @@ def main() -> None:
     CallbackQueryHandler(withdraw_all_eth_command, pattern='^withdraw_all_eth$', block=True),
     CallbackQueryHandler(withdraw_all_usdt_command, pattern='^withdraw_all_usdt$', block=True),
 ],
-            WITHDRAWL: [
-    MessageHandler(filters.TEXT, input_eth_address, block=True),
-    CallbackQueryHandler(withdraw_all_eth_command, pattern='^withdraw_all_eth$', block=True),
-    CallbackQueryHandler(withdraw_all_usdt_command, pattern='^withdraw_all_usdt$', block=True),
-]
+            INPUT_ETH_ADDRESS: [
+    MessageHandler(filters.TEXT, input_eth_address, block=True)
+]  
         },
         fallbacks=[start_handler],
         map_to_parent={
-            WITHDRAWL: WALLET_MENU
         }
     )
 

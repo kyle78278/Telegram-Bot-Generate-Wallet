@@ -340,3 +340,71 @@ TypeError: show_wallet_menu() missing 2 required positional arguments: 'private_
 2023-08-31 10:23:05,286 - telegram.ext.Application - INFO - Application started
 2023-08-31 10:31:22,002 - telegram.ext.Application - INFO - Application started
 2023-08-31 10:33:54,571 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:45:44,019 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:46:08,404 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 44, in start
+    return await show_main_menu(update, context)
+  File "main.py", line 65, in show_main_menu
+    address = generate_wallet(private_key)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/wallet.py", line 26, in generate_wallet
+    public_key = keys.PrivateKey(private_key).public_key
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/eth_keys/datatypes.py", line 251, in __init__
+    validate_private_key_bytes(private_key_bytes)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/eth_keys/validation.py", line 89, in validate_private_key_bytes
+    validate_bytes_length(value, 32, "private key")
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/eth_keys/validation.py", line 54, in validate_bytes_length
+    raise ValidationError(
+eth_utils.exceptions.ValidationError: Unexpected private key length: Expected 32, but got 0 bytes
+2023-08-31 10:46:38,396 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:46:56,580 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 44, in start
+    return await show_main_menu(update, context)
+  File "main.py", line 65, in show_main_menu
+    address = generate_wallet(private_key)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/wallet.py", line 26, in generate_wallet
+    public_key = keys.PrivateKey(private_key).public_key
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/eth_keys/datatypes.py", line 251, in __init__
+    validate_private_key_bytes(private_key_bytes)
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/eth_keys/validation.py", line 89, in validate_private_key_bytes
+    validate_bytes_length(value, 32, "private key")
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/eth_keys/validation.py", line 54, in validate_bytes_length
+    raise ValidationError(
+eth_utils.exceptions.ValidationError: Unexpected private key length: Expected 32, but got 0 bytes
+2023-08-31 10:54:30,302 - telegram.ext.Application - INFO - Application started
+2023-08-31 10:54:35,615 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 62, in start
+    private_key = await read_or_generate_private_key(user_id)
+  File "main.py", line 52, in read_or_generate_private_key
+    new_private_key = generate_new_private_key()
+NameError: name 'generate_new_private_key' is not defined
+2023-08-31 11:00:21,505 - telegram.ext.Application - INFO - Application started
+2023-08-31 11:03:37,347 - telegram.ext.Application - INFO - Application started
+2023-08-31 11:04:42,255 - __main__ - INFO - Transaction successful for user_id: 6117012777, to_address: 0xD5042ba7e365CeA492Ee9a2715c5cf47a012663a
+2023-08-31 11:06:57,962 - telegram.ext.Application - INFO - Application started
+2023-08-31 11:07:45,070 - __main__ - INFO - Transaction successful for user_id: 6117012777, to_address: 0xD5042ba7e365CeA492Ee9a2715c5cf47a012663a
+2023-08-31 11:08:56,916 - telegram.ext.Application - INFO - Application started
+2023-08-31 11:09:25,043 - __main__ - INFO - Transaction successful for user_id: 6117012777, to_address: 0xD5042ba7e365CeA492Ee9a2715c5cf47a012663a
+2023-08-31 11:09:33,452 - root - INFO - Entered delete_wallet function
+2023-08-31 11:09:33,703 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 11:09:33,704 - root - INFO - Successfully deleted private key for user 6117012777
