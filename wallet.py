@@ -142,41 +142,40 @@ async def withdraw_all_usdt(user_id: int, to_address: str, usdt_contract_address
         gas_price_gwei = fetch_gas_price_from_etherscan()
         if gas_price_gwei is None:
             return "Failed to fetch gas price from Etherscan."
-
+        
         gas_price_wei = w3.to_wei(gas_price_gwei, 'gwei')
-
-        # Read the private key from the file
+        
         with open(f"private_keys/{user_id}_private_key.txt", "r") as f:
             private_key = f.read().strip()
 
-        # Calculate the public address from the private key
         account = w3.eth.account.from_key(private_key)
         from_address = account.address
 
-        # Interact with the USDT contract
         usdt_contract = w3.eth.contract(address=usdt_contract_address, abi=usdt_abi)
 
-        # Get the balance
         balance = usdt_contract.functions.balanceOf(from_address).call()
 
-        # Estimate gas (assuming a fixed gas amount, you can adjust this)
-        gas_estimate = 210000  # This is an estimated gas limit for a USDT transfer
-
-        # Create a transaction to call the `transfer` function
-        transaction = usdt_contract.functions.transfer(to_address, balance).buildTransaction({
-            'chainId': 1,
-            'gas': gas_estimate,
+        # Create the transaction dictionary
+        transaction = {
+            'to': usdt_contract_address,
+            'value': 0,
+            'gas': 210000,
             'gasPrice': gas_price_wei,
             'nonce': w3.eth.get_transaction_count(from_address),
-        })
+            'chainId': 1,
+            'data': usdt_contract.encodeABI(fn_name='transfer', args=[to_address, balance])
+        }
 
         # Sign the transaction
         signed_transaction = w3.eth.account.sign_transaction(transaction, private_key)
 
         # Send the transaction
         tx_hash = w3.eth.send_raw_transaction(signed_transaction.rawTransaction)
+        
         return f"Transaction sent with hash: {tx_hash.hex()}"
 
     except Exception as e:
-        return f"An error occurred: {e}"
-
+        error_message = f"An error occurred: {e}. USDT balance was: {balance}"
+        with open("error_logs.txt", "a") as error_log:
+            error_log.write(f"{error_message}\n")
+        return error_message

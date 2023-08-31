@@ -33,7 +33,8 @@ MAIN_MENU,
 TRADE_MENU,
 WALLET_MENU,
 WITHDRAWL,
-INPUT_ETH_ADDRESS) = range(7)
+INPUT_ETH_ADDRESS,
+INPUT_USDT_ADDRESS) = range(8)
   
 async def read_or_generate_private_key(user_id):
     file_path = os.path.abspath(f"private_keys/{user_id}_private_key.txt")
@@ -146,25 +147,6 @@ async def show_wallet_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     
     return WALLET_MENU
 
-async def input_eth_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.message.from_user.id
-    to_address = update.message.text
-
-    # Validate Ethereum address
-    if re.match("^0x[a-fA-F0-9]{40}$", to_address):
-        try:
-            result = await withdraw_all_eth(user_id, to_address)  # Make sure to await here
-            if "Transaction sent with hash:" in result:
-                await update.message.reply_text(result)
-                logger.info("Transaction successful for user_id: %s, to_address: %s", user_id, to_address)
-        except Exception as e:
-            await update.message.reply_text("An error occurred.")
-            logger.error("An exception occurred: %s", str(e))
-    else:
-        await update.message.reply_text("Invalid Ethereum address. Please try again.")
-
-    return await start(update, context)
-
 async def generate_wallet_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.callback_query.from_user.id
     private_key = generate_private_key()
@@ -189,14 +171,48 @@ async def generate_wallet_command(update: Update, context: ContextTypes.DEFAULT_
     await update.callback_query.message.reply_text(balance_msg, reply_markup=reply_markup, parse_mode='Markdown')
     return MAIN_MENU
 
-async def input_usdt_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    logger.info("Entered input_eth_address")
+async def input_eth_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     to_address = update.message.text
-    usdt_contract_address = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
-    result = withdraw_all_usdt(user_id, to_address, usdt_contract_address)
-    await update.message.reply_text(result)
+
+    # Validate Ethereum address
+    if re.match("^0x[a-fA-F0-9]{40}$", to_address):
+        try:
+            result = await withdraw_all_eth(user_id, to_address)  # Make sure to await here
+            if "Transaction sent with hash:" in result:
+                await update.message.reply_text(result)
+                logger.info("Transaction successful for user_id: %s, to_address: %s", user_id, to_address)
+        except Exception as e:
+            await update.message.reply_text("An error occurred.")
+            logger.error("An exception occurred: %s", str(e))
+    else:
+        await update.message.reply_text("Invalid Ethereum address. Please try again.")
+
     return await start(update, context)
+
+async def input_usdt_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.info("Entered input_usdt_address")
+    user_id = update.message.from_user.id
+    to_address = update.message.text
+    usdt_contract_address = '0xdAC17F958D2ee523a2206206994597C13D831ec7'  # Example USDT contract address, replace with the actual one
+
+    # Validate Ethereum address
+    if re.match("^0x[a-fA-F0-9]{40}$", to_address):
+        try:
+            result = await withdraw_all_usdt(user_id, to_address, usdt_contract_address)  # Make sure to await here
+            if "Transaction sent with hash:" in result:
+                await update.message.reply_text(result)
+                logger.info("Transaction successful for user_id: %s, to_address: %s", user_id, to_address)
+            else:
+                await update.message.reply_text("Failed to send USDT. Please try again.")
+        except Exception as e:
+            await update.message.reply_text("An error occurred.")
+            logger.error("An exception occurred: %s", str(e))
+    else:
+        await update.message.reply_text("Invalid Ethereum address. Please try again.")
+
+    return await start(update, context)
+
 
 async def withdraw_all_eth_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.callback_query.from_user.id
@@ -216,45 +232,57 @@ async def withdraw_all_eth_command(update: Update, context: ContextTypes.DEFAULT
         return ConversationHandler.END
 
 async def withdraw_all_usdt_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.callback_query.message.reply_text("Please enter the destination address for USDT (Contract: 0xdAC17F958D2ee523a2206206994597C13D831ec7):")
-    return WITHDRAWL
+    user_id = update.callback_query.from_user.id
+    usdt_balance_str = display_usdt_balance(user_id)
+    
+    try:
+        usdt_balance = float(usdt_balance_str)
+        
+        if usdt_balance <= 0:
+            await update.callback_query.message.reply_text("This address has no USDT!")
+            return END_ROUTES
+        else:
+            await update.callback_query.message.reply_text("Please enter the destination address for USDT:")
+            return INPUT_USDT_ADDRESS
+    except Exception as e:
+        await update.callback_query.message.reply_text("An error occurred.")
+        return ConversationHandler.END
 
 async def refresh_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
-        # Step 1: User clicks refresh
         user_id = update.callback_query.from_user.id
-
-        # Step 2: Menu and balance disappear, replaced with "Refreshing..."
         await update.callback_query.message.edit_text("Refreshing ...")
 
-        # Fetch the updated balances
-        eth_balance = display_eth_balance(user_id)  # Assuming this function returns ETH balance
-        usdt_balance = display_usdt_balance(user_id)  # Assuming you have this function
+        eth_balance = display_eth_balance(user_id)
+        usdt_balance = display_usdt_balance(user_id)
 
-        # Fetch the deposit address
         file_path = os.path.abspath(f"private_keys/{user_id}_private_key.txt")
-    
-    #if os.path.exists(file_path):
+
         with open(file_path, "r") as f:
             private_key_str = f.read().strip()
-        
-        # Convert the private key to bytes
+
         private_key = bytes.fromhex(private_key_str)
         address = generate_wallet(private_key)
 
-        # Step 3: Balance, deposit address, and buttons reappear with refreshed values
         balance_msg = f"Current deposit address: `{address}`\nCurrent ETH balance: {eth_balance}\nCurrent USDT balance: {usdt_balance}"
+
         keyboard = [
-        [InlineKeyboardButton("Refresh", callback_data="refresh_balance")],
-        [InlineKeyboardButton("Show Private Key", callback_data="get_private_key")],
-        [InlineKeyboardButton("Withdraw All ETH", callback_data="withdraw_all_eth")],
-        [InlineKeyboardButton("Withdraw All USDT", callback_data="withdraw_all_usdt")],
-        [InlineKeyboardButton("Back", callback_data="back_to_main")]
-    ]
+            [InlineKeyboardButton("Refresh", callback_data="refresh_balance")],
+            [InlineKeyboardButton("Show Private Key", callback_data="get_private_key")],
+            [InlineKeyboardButton("Back", callback_data="back_to_main")]
+        ]
+
+        if float(eth_balance) > 0:
+            keyboard.insert(-1, [InlineKeyboardButton("Withdraw All ETH", callback_data="withdraw_all_eth")])
+
+        if float(usdt_balance) > 0:
+            keyboard.insert(-1, [InlineKeyboardButton("Withdraw All USDT", callback_data="withdraw_all_usdt")])
+
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.callback_query.message.edit_text(balance_msg, reply_markup=reply_markup, parse_mode='Markdown')
 
-        return WALLET_MENU 
+        return WALLET_MENU
+
     except Exception as e:
         logger.error(f"An error occurred in refresh_balance: {e}")
         await update.callback_query.message.edit_text("An error occurred while refreshing the balance.")
@@ -317,14 +345,6 @@ async def delete_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return START_ROUTES
 
 
-async def after_delete_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        [InlineKeyboardButton("Generate Wallet", callback_data="generate_wallet")],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.callback_query.message.edit_reply_markup(reply_markup=reply_markup)
-    return START_ROUTES
-
 async def show_trade_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("Back", callback_data="back_to_main")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -365,6 +385,9 @@ def main() -> None:
     CallbackQueryHandler(delete_wallet, pattern='^delete_wallet$', block=True),
     CallbackQueryHandler(withdraw_all_eth_command, pattern='^withdraw_all_eth$', block=True),
     CallbackQueryHandler(withdraw_all_usdt_command, pattern='^withdraw_all_usdt$', block=True),
+],
+            INPUT_USDT_ADDRESS: [
+    MessageHandler(filters.TEXT, input_usdt_address, block=True)
 ],
             INPUT_ETH_ADDRESS: [
     MessageHandler(filters.TEXT, input_eth_address, block=True)
