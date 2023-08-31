@@ -14,8 +14,6 @@ filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBU
 
 TELEGRAM_API_KEY = os.environ.get('TELEGRAM_API_KEY')
 
-import logging
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -34,11 +32,7 @@ logger = logging.getLogger(__name__)
 GENERATE_WALLET,
 MAIN_MENU,
 TRADE_MENU,
-WALLET_MENU,
-INPUT_ETH_ADDRESS,
-INPUT_USDT_ADDRESS,
-DELETE_WALLET,
-END_ROUTES) = range(9)
+WALLET_MENU,) = range(5)
   
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.message.from_user.id
@@ -133,7 +127,7 @@ async def generate_wallet_command(update: Update, context: ContextTypes.DEFAULT_
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.message.reply_text(balance_msg, reply_markup=reply_markup, parse_mode='Markdown')
-    return GENERATE_WALLET
+    return MAIN_MENU
 
 async def input_usdt_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info("Entered input_eth_address")
@@ -156,14 +150,14 @@ async def withdraw_all_eth_command(update: Update, context: ContextTypes.DEFAULT
             return END_ROUTES
         else:
             await update.callback_query.message.reply_text("Please enter the destination address for ETH:")
-            return INPUT_ETH_ADDRESS
+            return WALLET_MENU
     except Exception as e:
         await update.callback_query.message.reply_text("An error occurred.")
         return ConversationHandler.END
 
 async def withdraw_all_usdt_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.message.reply_text("Please enter the destination address for USDT (Contract: 0xdAC17F958D2ee523a2206206994597C13D831ec7):")
-    return INPUT_USDT_ADDRESS
+    return WALLET_MENU
 
 async def refresh_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
@@ -221,23 +215,51 @@ async def get_private_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.callback_query.message.reply_text(warning_msg, reply_markup=reply_markup, parse_mode='Markdown')
-    return MAIN_MENU
+    return WALLET_MENU
 
 async def delete_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logging.info("Entered delete_wallet function")  # To confirm function entry
+
+    # Immediately update the text to "Deleting..."
+    await update.callback_query.message.edit_text("Deleting...")
+
     user_id = update.callback_query.from_user.id
+    file_path = f"private_keys/{user_id}_private_key.txt"
+
+    logging.info(f"Attempting to delete file: {file_path}")  # Debugging info
+
     try:
-        os.remove(f"private_keys/{user_id}_private_key.txt")
+        os.remove(file_path)
+        logging.info(f"Successfully deleted private key for user {user_id}")  # Debugging info
+
+        # Update the text and add a "Generate Wallet" button
+        keyboard = [
+            [InlineKeyboardButton("Generate Wallet", callback_data="generate_wallet")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.callback_query.message.edit_text(
+            "Your wallet has been successfully deleted. Click 'Generate Wallet' to get a new wallet address.",
+            reply_markup=reply_markup
+        )
+
+        return START_ROUTES
     except FileNotFoundError:
-        logging.error(f"Failed to delete private key for user {user_id}: File not found")
-        await update.callback_query.message.reply_text("Error: Private key file not found.")
+        logging.error(f"Failed to delete private key for user {user_id}: File not found")  # Error log
+        await update.callback_query.message.edit_text("Error: Private key file not found.")
         return START_ROUTES
     except Exception as e:
-        logging.error(f"Failed to delete private key for user {user_id}: {e}")
-        await update.callback_query.message.reply_text("Error: Could not delete private key.")
+        logging.error(f"Failed to delete private key for user {user_id}: {e}")  # Error log
+        await update.callback_query.message.edit_text("Error: Could not delete private key.")
         return START_ROUTES
-    else:
-        await start(update, context)
-        return DELETE_WALLET
+
+
+async def after_delete_wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("Generate Wallet", callback_data="generate_wallet")],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.message.edit_reply_markup(reply_markup=reply_markup)
+    return START_ROUTES
 
 async def show_eth_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
@@ -255,6 +277,8 @@ async def show_trade_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.message.edit_reply_markup(reply_markup=reply_markup)
     return TRADE_MENU
+
+AFTER_DELETE_WALLET = "AFTER_DELETE_WALLET"  # New state constant
 
 def main() -> None:
     application = Application.builder().token(TELEGRAM_API_KEY).build()
@@ -276,7 +300,8 @@ def main() -> None:
             ],
             MAIN_MENU: [
                 CallbackQueryHandler(show_wallet_menu, pattern='^show_wallet_menu$', block=True),
-                CallbackQueryHandler(show_trade_menu, pattern='^show_trade_menu$', block=True)
+                CallbackQueryHandler(show_trade_menu, pattern='^show_trade_menu$', block=True),
+                CallbackQueryHandler(delete_wallet, pattern='^delete_wallet$', block=True),
             ],
             TRADE_MENU: [
                 CallbackQueryHandler(show_main_menu, pattern='^back_to_main$', block=True)
@@ -286,24 +311,13 @@ def main() -> None:
                 CallbackQueryHandler(refresh_balance, pattern='^refresh_balance$', block=True),
                 CallbackQueryHandler(withdraw_all_eth_command, pattern='^withdraw_all_eth$', block=True),
                 CallbackQueryHandler(withdraw_all_usdt_command, pattern='^withdraw_all_usdt$', block=True),
-                CallbackQueryHandler(show_main_menu, pattern='^back_to_main$', block=True),
-                CallbackQueryHandler(show_wallet_menu, pattern='^back_to_wallet_menu$', block=True)
-            ],
-            INPUT_ETH_ADDRESS: [
+                CallbackQueryHandler(show_wallet_menu, pattern='^back_to_wallet_menu$', block=True),
+                CallbackQueryHandler(delete_wallet, pattern='^delete_wallet$', block=True),
                 MessageHandler(filters.TEXT, input_eth_address, block=True)
             ],
-            INPUT_USDT_ADDRESS: [
-                MessageHandler(filters.TEXT, input_usdt_address, block=True)
-            ],
-            DELETE_WALLET: [
-                CallbackQueryHandler(delete_wallet, pattern='^delete_wallet$', block=True),
-            ]
         },
         fallbacks=[],
         map_to_parent={
-            DELETE_WALLET: START_ROUTES,
-            INPUT_ETH_ADDRESS: MAIN_MENU,
-            INPUT_USDT_ADDRESS: MAIN_MENU
         }
     )
 
@@ -315,3 +329,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

@@ -178,3 +178,36 @@ Traceback (most recent call last):
     return PRIVATE_KEY_ROUTES
 NameError: name 'PRIVATE_KEY_ROUTES' is not defined
 2023-08-31 07:10:40,911 - telegram.ext.Application - INFO - Application started
+2023-08-31 07:21:30,127 - telegram.ext.Application - INFO - Application started
+2023-08-31 07:23:11,883 - telegram.ext.Application - INFO - Application started
+2023-08-31 07:41:51,739 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:01:53,406 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:03:55,805 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:04:04,553 - root - INFO - Entered delete_wallet function
+2023-08-31 08:04:04,553 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 08:04:04,554 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 08:07:12,948 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:10:38,501 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:10:59,818 - root - INFO - Entered delete_wallet function
+2023-08-31 08:10:59,828 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 08:10:59,835 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 08:16:08,012 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:16:36,213 - root - INFO - Entered delete_wallet function
+2023-08-31 08:16:36,503 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 08:16:36,508 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 08:19:04,968 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:19:15,703 - root - INFO - Entered delete_wallet function
+2023-08-31 08:19:16,013 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 08:19:16,026 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 08:20:09,897 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:20:17,644 - root - INFO - Entered delete_wallet function
+2023-08-31 08:20:17,949 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 08:20:18,018 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 08:23:10,883 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:23:19,109 - root - INFO - Entered delete_wallet function
+2023-08-31 08:23:19,314 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 08:23:19,315 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 08:24:54,740 - telegram.ext.Application - INFO - Application started
+2023-08-31 08:25:08,806 - root - INFO - Entered delete_wallet function
+2023-08-31 08:25:09,017 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 08:25:09,018 - root - INFO - Successfully deleted private key for user 6117012777
