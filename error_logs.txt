@@ -440,3 +440,31 @@ An error occurred: 'transfer' object has no attribute 'buildTransaction'. USDT b
 2023-08-31 12:48:38,019 - root - INFO - Entered delete_wallet function
 2023-08-31 12:48:38,410 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
 2023-08-31 12:48:38,471 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 16:19:00,885 - telegram.ext.Application - INFO - Application started
+2023-08-31 16:19:20,847 - root - INFO - Entered delete_wallet function
+2023-08-31 16:19:21,061 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-08-31 16:19:21,072 - root - INFO - Successfully deleted private key for user 6117012777
+2023-08-31 18:13:37,933 - telegram.ext.Application - INFO - Application started
+2023-08-31 18:18:27,818 - telegram.ext.Application - INFO - Application started
+2023-08-31 18:19:51,351 - telegram.ext.Application - ERROR - No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_application.py", line 1173, in process_update
+    await coroutine
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_conversationhandler.py", line 825, in handle_update
+    new_state: object = await handler.handle_update(
+  File "/home/runner/Telegram-Bot-Generate-Wallet/.pythonlibs/lib/python3.10/site-packages/telegram/ext/_basehandler.py", line 141, in handle_update
+    return await self.callback(update, context)
+  File "main.py", line 88, in show_wallet_menu
+    eth_balance = float(display_eth_balance(user_id))
+TypeError: float() argument must be a string or a real number, not 'NoneType'
+2023-08-31 18:24:56,732 - telegram.ext.Application - INFO - Application started
+2023-09-01 05:29:46,205 - telegram.ext.Application - INFO - Application started
+2023-09-01 05:30:56,756 - __main__ - INFO - Entered input_usdc_address
+2023-09-01 05:30:58,875 - __main__ - INFO - Transaction successful for user_id: 6117012777, to_address: 0xD5042ba7e365CeA492Ee9a2715c5cf47a012663a
+2023-09-01 05:34:19,994 - telegram.ext.Application - INFO - Application started
+2023-09-01 05:34:36,594 - __main__ - INFO - Entered input_usdc_address
+2023-09-01 05:34:38,730 - __main__ - INFO - Transaction successful for user_id: 6117012777, to_address: 0xD5042ba7e365CeA492Ee9a2715c5cf47a012663a
+2023-09-01 05:38:29,952 - __main__ - INFO - Transaction successful for user_id: 6117012777, to_address: 0xD5042ba7e365CeA492Ee9a2715c5cf47a012663a
+2023-09-01 05:39:22,448 - root - INFO - Entered delete_wallet function
+2023-09-01 05:39:22,683 - root - INFO - Attempting to delete file: private_keys/6117012777_private_key.txt
+2023-09-01 05:39:22,699 - root - INFO - Successfully deleted private key for user 6117012777
